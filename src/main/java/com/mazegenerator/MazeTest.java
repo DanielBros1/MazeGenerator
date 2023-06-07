@@ -6,6 +6,13 @@ public class MazeTest {
 
     //wstepnie
     int mazeSize = 7;
+
+    /**
+     * tableOfFields
+     * 0 - definiujemy na starcie
+     * 1 - sciezka
+     * 2 - sciana
+     */
     int[][] tableOfFields;
 
 //    HashSet<Field> visitedFields = new HashSet<>();
@@ -70,6 +77,9 @@ public class MazeTest {
         visitedFields.add(startField);
         result.add(startField);
 
+        printTable();
+
+
         List<List<Integer>> neigbours = printUnvisitedNeighbours(startField.get(0), startField.get(1));
 
 
@@ -87,7 +97,12 @@ public class MazeTest {
             else if (numberOfNeighbours > 1 && isFieldBrink(x, y)) {
                 // OK
             }
+            else if (numberOfNeighbours > 0 && IsCornerField(x, y)) {
+                // OK
+            }
             else {
+                //jezeli pole zostanie uznanane, za niemozliwe do wejscia, to nalezy oznaczyc je jako sciane
+                this.tableOfFields[element.get(0)][element.get(1)] = 2;
                 //Jesli pole nie ma wystarczajacej liczby nieodwiedzonych sasiadow, to go usuwamy
                 //Zaburzaloby to wyglad labiryntu
                 iterator.remove();
@@ -100,7 +115,7 @@ public class MazeTest {
         }
 
         for (List<Integer> neigbour : neigbours) {
-            if(!(visitedFields.contains(neigbour))) {
+            if(!(visitedFields.contains(neigbour)) && this.tableOfFields[neigbour.get(0)][neigbour.get(1)] != 2) {
                 dfs_recur(neigbour, result);
             }
         }
@@ -118,16 +133,16 @@ public class MazeTest {
 
         List<List<Integer>> neighbours = new ArrayList<>();
 
-        if (x - 1 >= 0 && this.tableOfFields[x-1][y] == 0) {
+        if (x - 1 >= 0 && this.tableOfFields[x-1][y] != 1) {
             neighbours.add(List.of(x -1, y));
         }
-        if (y -1 >= 0 && this.tableOfFields[x][y-1] == 0)  {
+        if (y -1 >= 0 && this.tableOfFields[x][y-1] != 1)  {
             neighbours.add(List.of(x, y-1));
         }
-        if (x + 1 <= this.mazeSize - 1 && this.tableOfFields[x+1][y] == 0) {
+        if (x + 1 <= this.mazeSize - 1 && this.tableOfFields[x+1][y] != 1) {
             neighbours.add(List.of(x + 1, y));
         }
-        if (y + 1 <= this.mazeSize -1 && this.tableOfFields[x][y+1] == 0) {
+        if (y + 1 <= this.mazeSize -1 && this.tableOfFields[x][y+1] != 1) {
             neighbours.add(List.of(x, y+1));
         }
  //       for (List<Integer> neighbour : neighbours) {
@@ -138,10 +153,20 @@ public class MazeTest {
     }
 
     public boolean isFieldBrink (int x, int y) {
-        if (x == 0 || y == 0 || x == this.mazeSize || y == this.mazeSize) {
+        if (x == 0 || y == 0 || x == this.mazeSize-1 || y == this.mazeSize-1) {
             return true;
         }
         else { return false;}
+    }
+
+    private boolean IsCornerField(int x, int y) {
+        if (x == 0 && y == 0 ||
+            x == 0 && y == (mazeSize -1) ||
+            x == (mazeSize -1) && y == 0 ||
+            x == (mazeSize - 1) && y == (mazeSize - 1)) {
+            return true;
+        }
+        return false;
     }
 
 
@@ -167,11 +192,13 @@ public class MazeTest {
 
   */
     public void printTable() {
-        for (int[] field : tableOfFields) {
-            for (int i : field) {
-                System.out.println(field[i] +" ");
+        for (int i = 0; i < this.tableOfFields.length; i++) {
+            for (int j = 0; j < tableOfFields.length; j++) {
+                System.out.print(this.tableOfFields[j][i] + " ");
             }
             System.out.println();
         }
+        System.out.println("----------");
     }
+
 }
