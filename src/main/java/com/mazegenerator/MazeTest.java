@@ -5,7 +5,7 @@ import java.util.*;
 public class MazeTest {
 
     //wstepnie
-    int mazeSize = 7;
+    int mazeSize = 0;
 
     /**
      * tableOfFields
@@ -49,7 +49,7 @@ public class MazeTest {
     private int drawStartYField(){
         Random random = new Random();
 
-        int startY = random.nextInt(7);
+        int startY = random.nextInt(this.mazeSize);
 
         return startY;
     }
@@ -193,9 +193,11 @@ public class MazeTest {
   */
     public void printTable() {
         for (int i = 0; i < this.tableOfFields.length; i++) {
+            System.out.print("{");
             for (int j = 0; j < tableOfFields.length; j++) {
-                System.out.print(this.tableOfFields[j][i] + " ");
+                System.out.print(this.tableOfFields[j][i] + ", ");
             }
+            System.out.print("}");
             System.out.println();
         }
         System.out.println("----------");

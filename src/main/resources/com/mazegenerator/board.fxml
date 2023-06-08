@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.shape.Rectangle?>
+
+<GridPane xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.BoardController">
+    <columnConstraints>
+        <ColumnConstraints maxWidth="15" minWidth="15" prefWidth="15" />
+        <ColumnConstraints maxWidth="15" minWidth="15" prefWidth="15" />
+        <ColumnConstraints maxWidth="15" minWidth="15" prefWidth="15" />
+        <ColumnConstraints maxWidth="15" minWidth="15" prefWidth="15" />
+        <ColumnConstraints maxWidth="15" minWidth="15" prefWidth="15" />
+        <ColumnConstraints maxWidth="15" minWidth="15" prefWidth="15" />
+        <ColumnConstraints maxWidth="15" minWidth="15" prefWidth="15" />
+        <ColumnConstraints maxWidth="15" minWidth="15" prefWidth="15" />
+    </columnConstraints>
+    <rowConstraints>
+        <RowConstraints maxHeight="15.0" minHeight="15.0" prefHeight="15.0" />
+        <RowConstraints maxHeight="15.0" minHeight="15.0" prefHeight="15.0" />
+        <RowConstraints maxHeight="15.0" minHeight="15.0" prefHeight="15.0" />
+        <RowConstraints maxHeight="15.0" minHeight="15.0" prefHeight="15.0" />
+        <RowConstraints maxHeight="15.0" minHeight="15.0" prefHeight="15.0" />
+        <RowConstraints maxHeight="15.0" minHeight="15.0" prefHeight="15.0" />
+        <RowConstraints maxHeight="15.0" minHeight="15.0" prefHeight="15.0" />
+        <RowConstraints maxHeight="15.0" minHeight="15.0" prefHeight="15.0" />
+    </rowConstraints>
+
+    <Rectangle fx:id="cell_0_0" fill="WHITE" scaleX="16.0" scaleY="16.0" stroke="BLACK" translateX="7.0" />
+    <Rectangle fx:id="cell_1_0" fill="WHITE" stroke="BLACK" GridPane.columnIndex="1" />
+    <Rectangle fx:id="cell_2_0" fill="WHITE" stroke="BLACK" GridPane.columnIndex="2" />
+    <Rectangle fx:id="cell_3_0" fill="WHITE" stroke="BLACK" GridPane.columnIndex="3" />
+    <Rectangle fx:id="cell_4_0" fill="WHITE" stroke="BLACK" GridPane.columnIndex="4" />
+    <Rectangle fx:id="cell_5_0" fill="WHITE" stroke="BLACK" GridPane.columnIndex="5" />
+    <Rectangle fx:id="cell_6_0" fill="WHITE" height="1.0" scaleX="16.0" scaleY="8.0" stroke="BLACK" translateX="8.0" GridPane.columnIndex="6" />
+    <Rectangle fx:id="cell_7_0" fill="WHITE" stroke="BLACK" GridPane.columnIndex="7" />
+
+    <!-- Dodaj Rectangle dla pozostałych pól na planszy -->
+
+</GridPane>
