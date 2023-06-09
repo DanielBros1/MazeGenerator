@@ -2,6 +2,7 @@ package com.mazegenerator;
 
 import javafx.application.Application;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
@@ -10,16 +11,20 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Ellipse;
 import javafx.stage.Stage;
 
+
 public class TablicaObraz extends Application {
     private static final int WIDTH = 20;
     private static final int HEIGHT = 20;
     private static final int PIXEL_SIZE = 35;
-    private static final int FRAME_SIZE = 2; // Rozmiar ramki w pikselach
+    private static final int FRAME_SIZE = 0; // Rozmiar ramki w pikselach
+
+    private int[][] tabl;
 
     private static int[][] tablica = {
             {2, 1, 1, 1, 1, 2, 1, 1, 1, 2, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1},
@@ -44,9 +49,13 @@ public class TablicaObraz extends Application {
             {0, 0, 2, 1, 1, 1, 1, 1, 2, 1, 1, 2, 1, 2, 1, 1, 1, 1, 1, 1}
     };
 
+
+
+
     public static void main(String[] args) {
         launch(args);
     }
+
 
     @Override
     public void start(Stage primaryStage) {
@@ -54,24 +63,37 @@ public class TablicaObraz extends Application {
 
         Group root = new Group();
 
-        // Tworzenie MENU
+        /**
+         *  OGÓLNY UKŁAD:
+         *  BORDERPANE {
+         *      CENTER - MazeVisualization
+         *      RIGHT - MenuPane
+         *
+         *      BORDERPANE - MenuPane {
+         *          TOP - TitleBox
+         *          CENTER - InfoBox
+         *          CENTER - MazeBox
+         *          BOTTOM - ButtonBox
+         *          }
+         *      }
+         *
+         */
+
+        // menuPane
         BorderPane menuPane = new BorderPane();
         menuPane.setPadding(new Insets(10));
         menuPane.setStyle("-fx-background-color: #EDEDED");
 
 
-        HBox titleBox = new HBox();
-        titleBox.setPadding(new Insets(5));
-        titleBox.setStyle("-fx-background-color: #8B4513; -fx-alignment: center;");
-
         // Napis w MENU
         Label titleLabel = new Label("INFORMACJE O LABIRYNCIE");
-        titleLabel.setStyle("-fx-text-fill: white; -fx-font-size: 16; -fx-padding: 5;");
-        titleLabel.setGraphic(new Ellipse(10, 5, 200, 25));
-        titleLabel.setGraphicTextGap(10);
+        titleLabel.setStyle("-fx-background-color: #8B4513; -fx-text-fill: white; -fx-font-size: 16; -fx-padding: 5;");
+        titleLabel.setPrefWidth(250);
+        titleLabel.setAlignment(Pos.CENTER);
 
-        titleBox.getChildren().add(titleLabel);
-
+        Pane titlePane = new Pane();
+        titlePane.setStyle("-fx-background-color: #EDEDED");
+        titlePane.getChildren().add(titleLabel);
 
         // Dodawanie etykiet z informacjami o obrazku
         Label widthLabel = new Label("Width: " + WIDTH);
@@ -85,10 +107,32 @@ public class TablicaObraz extends Application {
         HBox.setMargin(button1, new Insets(5));
         HBox.setMargin(button2, new Insets(5));
 
+        button2.setOnMouseEntered(mouseEvent -> {
+                button2.setStyle("-fx-background-color: yellow");
+                button2.setText("Najechany");
+        });
+        button2.setOnMouseExited(mouseEvent -> {
+            button2.setText("Przycisk 2");
+        });
+        // Obsługa zdarzenia przycisku 1
+        button1.setOnAction(event -> {
+            button1.setStyle("-fx-background-color: blue;");
+        });
+
+        //TitleBox
+        HBox titleBox = new HBox(titlePane);
+        titleBox.setSpacing(10);
+        titleBox.setPadding(new Insets(10));
+
+        //InfoBox
         HBox infoBox = new HBox(widthLabel, heightLabel, pixelSizeLabel);
         infoBox.setSpacing(10);
         infoBox.setPadding(new Insets(10));
 
+        //MazeBox
+        BorderPane mazeBox = new BorderPane();
+
+        //ButtonBox
         HBox buttonBox = new HBox(button1, button2);
         buttonBox.setSpacing(10);
         buttonBox.setPadding(new Insets(10));

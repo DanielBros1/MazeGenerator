@@ -54,7 +54,7 @@ public class MazeTest {
         return startY;
     }
 
-    public void dfsMazeCreator() {
+    public int[][] dfsMazeCreator() {
 //        int startY = this.drawStartYField();
         int startY = 1;
         List<List<Integer>> result = new ArrayList<>();
@@ -70,6 +70,8 @@ public class MazeTest {
             System.out.print(integerList + ", ");
         }
         System.out.println();
+
+        return this.tableOfFields;
     }
 
     private void dfs_recur(List<Integer> startField, List<List<Integer>> result) {

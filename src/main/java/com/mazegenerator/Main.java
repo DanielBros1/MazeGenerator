@@ -14,8 +14,11 @@ public class Main {
 
     //    mazeTest.printUnvisitedNeighbours(0, 4);
 
-        mazeTest.dfsMazeCreator();
+        int [][] generatedMaze;
+        generatedMaze = mazeTest.dfsMazeCreator();
         System.out.println("Result: ");
         mazeTest.printTable();
+
+     //   TablicaObraz tablicaObraz = new TablicaObraz(generatedMaze);
     }
 }
