@@ -37,14 +37,6 @@ public class MazeTest {
         int xFinish = finishField.get(0);
         int yFinish = finishField.get(1);
 */
-    public void drawma() {
-        int xStart = 0;
-        int yStart = 5;
-        int xFinish = 0;
-        int yFinish = 14;
-
-
-    }
 
     private int drawStartYField(){
         Random random = new Random();
@@ -70,6 +62,11 @@ public class MazeTest {
             System.out.print(integerList + ", ");
         }
         System.out.println();
+
+        //Oznaczamy pola:
+        //@Poczatek i @Koniec
+
+        this.tableOfFields[1][0] = 3;
 
         return this.tableOfFields;
     }

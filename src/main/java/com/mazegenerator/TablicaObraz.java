@@ -1,6 +1,7 @@
 package com.mazegenerator;
 
 import javafx.application.Application;
+import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
@@ -17,12 +18,21 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Ellipse;
 import javafx.stage.Stage;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.net.URL;
+import java.util.ResourceBundle;
+import java.util.Scanner;
+
 
 public class TablicaObraz extends Application {
-    private static final int WIDTH = 20;
-    private static final int HEIGHT = 20;
+ //   private static final int WIDTH = 20;
+ //   private static final int HEIGHT = 20;
+
+    private int WIDTH;
+    private int HEIGHT;
     private static final int PIXEL_SIZE = 35;
-    private static final int FRAME_SIZE = 0; // Rozmiar ramki w pikselach
+    private int FRAME_SIZE = 1; // Rozmiar ramki w pikselach
 
     private int[][] tabl;
 
@@ -56,12 +66,22 @@ public class TablicaObraz extends Application {
         launch(args);
     }
 
-
     @Override
     public void start(Stage primaryStage) {
-        primaryStage.setTitle("Tablica Obraz");
 
-        Group root = new Group();
+        //Creating a default Maze
+
+        MazeTest mazeTest = new MazeTest(13);
+
+        int[][] tabMaze = mazeTest.dfsMazeCreator();
+
+        this.tabl = tabMaze;
+
+        this.HEIGHT = tabMaze.length;
+        this.WIDTH = tabMaze.length;
+
+        primaryStage.setTitle("Tablica Obraz");
+        Group root = new Group(); //todo wyjasnic
 
         /**
          *  OGÓLNY UKŁAD:
@@ -83,7 +103,7 @@ public class TablicaObraz extends Application {
         BorderPane menuPane = new BorderPane();
         menuPane.setPadding(new Insets(10));
         menuPane.setStyle("-fx-background-color: #EDEDED");
-
+        //     BorderPane menuPane = createMenuPane();
 
         // Napis w MENU
         Label titleLabel = new Label("INFORMACJE O LABIRYNCIE");
@@ -107,17 +127,6 @@ public class TablicaObraz extends Application {
         HBox.setMargin(button1, new Insets(5));
         HBox.setMargin(button2, new Insets(5));
 
-        button2.setOnMouseEntered(mouseEvent -> {
-                button2.setStyle("-fx-background-color: yellow");
-                button2.setText("Najechany");
-        });
-        button2.setOnMouseExited(mouseEvent -> {
-            button2.setText("Przycisk 2");
-        });
-        // Obsługa zdarzenia przycisku 1
-        button1.setOnAction(event -> {
-            button1.setStyle("-fx-background-color: blue;");
-        });
 
         //TitleBox
         HBox titleBox = new HBox(titlePane);
@@ -151,7 +160,49 @@ public class TablicaObraz extends Application {
                         HEIGHT * PIXEL_SIZE + (HEIGHT * FRAME_SIZE));
         GraphicsContext gc = canvas.getGraphicsContext2D();
 
+   //     this.tabl = tablica;
+
+        // Przed tym nalezy wczytac tablice
         drawPixels(gc);
+
+        /**
+        Obsluga zdarzen powinna byc przeniesiona do package'u 'controllers'
+
+         */
+
+        // Obsługa zdarzenia przycisku 1
+        button1.setOnAction(event -> {
+            // Czyszczenie płótna
+            gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
+        });
+
+
+        button2.setOnMouseEntered(mouseEvent -> {
+            button2.setText("Najechany");
+        });
+        button2.setOnMouseExited(mouseEvent -> {
+            button2.setText("Przycisk 2");
+        });
+  /*      button2.setOnAction(actionEvent -> {
+            //Stworz nowy labirynt
+            MazeTest maze2 = new MazeTest(14); //todo zczytuj z TextField
+
+            this.tabl = maze2.dfsMazeCreator();
+
+            this.HEIGHT = this.tabl.length;
+            this.WIDTH = this.tabl.length;
+
+            // Zmiana rozmiaru płótna
+            canvas.setWidth(this.HEIGHT);
+            canvas.setHeight(this.WIDTH);
+
+            // Pobranie nowego GraphicsContext
+            GraphicsContext ga = canvas.getGraphicsContext2D();
+
+            // Ponowne wypełnienie płótna
+            drawPixels(ga);
+        }); */
+
 
         BorderPane borderPane = new BorderPane();
         borderPane.setCenter(canvas);
@@ -159,15 +210,32 @@ public class TablicaObraz extends Application {
 
         root.getChildren().add(borderPane);
         primaryStage.setScene(new Scene(root));
+
         primaryStage.show();
     }
+
+  //  private BorderPane createMenuPane() {
+//    }
 
     private void drawPixels(GraphicsContext gc) {
         //todo Sprawdzic i ewentualnie zamienic "x" z "y"
         for (int y = 0; y < HEIGHT; y++) {
             for (int x = 0; x < WIDTH; x++) {
-                int pixelValue = tablica[y][x];
+                int pixelValue = tabl[y][x];
                 Color pixelColor = getColorForValue(pixelValue);
+                //Dla scianki zwiekszamy rozmiar ramki
+
+                //todo Efekt 3D - to consider
+            /*    if (pixelValue == 2) {
+                    FRAME_SIZE = 3;
+                }
+                else {
+                    FRAME_SIZE = 1;
+                }
+
+                ///
+*/
+
                 gc.setFill(pixelColor);
                 gc.fillRect(
                         x * (PIXEL_SIZE + FRAME_SIZE),
@@ -187,6 +255,30 @@ public class TablicaObraz extends Application {
         }
     }
 
+    private void loadArrayFromFile(String filename) {
+        try {
+            File file = new File(filename);
+            Scanner scanner = new Scanner(file);
+
+            int height = scanner.nextInt();
+            int width = scanner.nextInt();
+
+            this.HEIGHT = scanner.nextInt();
+            this.WIDTH = scanner.nextInt();
+
+            this.tabl = new int[height][width];
+
+            for (int row = 0; row < height; row++) {
+                for (int col = 0; col < width; col++) {
+                    this.tabl[row][col] = scanner.nextInt();
+                }
+            }
+            scanner.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+
     private Color getColorForValue(int value) {
         switch (value) {
             case 0:
@@ -195,11 +287,12 @@ public class TablicaObraz extends Application {
             case 1:
                 return Color.KHAKI.brighter();
             case 3:
-                return Color.LIGHTGOLDENRODYELLOW;
+                return Color.CHARTREUSE;
             case 4:
                 return Color.CORNFLOWERBLUE;
             default:
                 return Color.LAWNGREEN;
         }
     }
+
 }
