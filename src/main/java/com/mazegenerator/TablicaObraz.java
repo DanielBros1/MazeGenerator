@@ -1,7 +1,8 @@
 package com.mazegenerator;
 
 import javafx.application.Application;
-import javafx.fxml.Initializable;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
@@ -9,57 +10,35 @@ import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
+import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
+import javafx.scene.effect.DropShadow;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Ellipse;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
-
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.net.URL;
-import java.util.ResourceBundle;
-import java.util.Scanner;
 
 
 public class TablicaObraz extends Application {
- //   private static final int WIDTH = 20;
- //   private static final int HEIGHT = 20;
 
     private int WIDTH;
     private int HEIGHT;
-    private static final int PIXEL_SIZE = 35;
-    private int FRAME_SIZE = 1; // Rozmiar ramki w pikselach
+    private double PIXEL_SIZE = 35;
+    private double FRAME_SIZE = 1; // Rozmiar ramki
+    private int SELECTED_SIZE_BY_USER = 15;
 
     private int[][] tabl;
 
-    private static int[][] tablica = {
-            {2, 1, 1, 1, 1, 2, 1, 1, 1, 2, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1},
-            {3, 1, 2, 2, 1, 2, 1, 2, 1, 1, 2, 1, 2, 1, 1, 2, 1, 2, 2, 1},
-            {2, 2, 1, 2, 1, 2, 1, 1, 2, 1, 2, 1, 2, 1, 2, 2, 1, 1, 1, 2},
-            {1, 1, 1, 2, 1, 1, 1, 2, 1, 1, 2, 1, 2, 1, 2, 1, 2, 2, 1, 1},
-            {1, 2, 1, 1, 2, 1, 2, 1, 1, 2, 2, 1, 1, 1, 1, 1, 2, 1, 1, 2},
-            {1, 2, 2, 1, 1, 2, 1, 2, 1, 1, 1, 2, 1, 2, 1, 2, 1, 1, 2, 1},
-            {1, 1, 1, 2, 2, 1, 1, 1, 2, 2, 1, 1, 2, 1, 1, 2, 1, 2, 1, 1},
-            {1, 2, 1, 2, 1, 1, 2, 1, 2, 1, 2, 1, 1, 2, 2, 1, 1, 1, 1, 2},
-            {2, 1, 1, 2, 1, 2, 2, 1, 1, 1, 2, 2, 1, 1, 1, 2, 1, 2, 1, 1},
-            {1, 1, 2, 1, 1, 2, 1, 2, 2, 1, 1, 1, 2, 2, 1, 2, 1, 1, 2, 1},
-            {4, 2, 2, 1, 2, 1, 1, 1, 1, 2, 1, 2, 0, 2, 1, 1, 2, 1, 2, 1},
-            {1, 1, 1, 1, 2, 2, 1, 2, 1, 2, 1, 1, 2, 1, 2, 1, 1, 1, 2, 1},
-            {1, 2, 1, 2, 1, 1, 1, 2, 2, 1, 2, 1, 1, 1, 1, 2, 2, 2, 2, 1},
-            {1, 1, 2, 1, 1, 2, 1, 1, 1, 1, 1, 2, 1, 2, 1, 2, 1, 1, 1, 1},
-            {2, 1, 1, 2, 1, 1, 2, 2, 1, 2, 1, 2, 1, 1, 2, 1, 1, 2, 2, 2},
-            {1, 2, 1, 1, 2, 2, 1, 1, 1, 1, 2, 1, 2, 1, 1, 2, 1, 2, 1, 1},
-            {1, 1, 2, 1, 1, 1, 2, 1, 2, 1, 1, 1, 2, 1, 2, 1, 1, 2, 2, 1},
-            {2, 1, 1, 2, 2, 1, 1, 2, 1, 1, 2, 1, 2, 1, 1, 2, 1, 1, 1, 1},
-            {0, 2, 1, 1, 2, 1, 2, 1, 1, 2, 1, 1, 1, 2, 1, 2, 2, 2, 1, 2},
-            {0, 0, 2, 1, 1, 1, 1, 1, 2, 1, 1, 2, 1, 2, 1, 1, 1, 1, 1, 1}
-    };
+    private GraphicsContext gc;
+    private Canvas canvas;
 
-
+    Label widthLabel = new Label("Width: ");
+    Label heightLabel = new Label("Height: ");
+    Label pixelSizeLabel = new Label("Pixel Size: ");
 
 
     public static void main(String[] args) {
@@ -69,88 +48,16 @@ public class TablicaObraz extends Application {
     @Override
     public void start(Stage primaryStage) {
 
-        //Creating a default Maze
-
-        MazeTest mazeTest = new MazeTest(13);
-
-        int[][] tabMaze = mazeTest.dfsMazeCreator();
-
-        this.tabl = tabMaze;
-
-        this.HEIGHT = tabMaze.length;
-        this.WIDTH = tabMaze.length;
+        //Tworzenie labiryntu
+        createDefaultMaze(15);
 
         primaryStage.setTitle("Tablica Obraz");
         Group root = new Group(); //todo wyjasnic
 
-        /**
-         *  OGÓLNY UKŁAD:
-         *  BORDERPANE {
-         *      CENTER - MazeVisualization
-         *      RIGHT - MenuPane
-         *
-         *      BORDERPANE - MenuPane {
-         *          TOP - TitleBox
-         *          CENTER - InfoBox
-         *          CENTER - MazeBox
-         *          BOTTOM - ButtonBox
-         *          }
-         *      }
-         *
-         */
+        //Uklad wyswietlania programu
+        BorderPane menuPane = createMenuPane();
 
-        // menuPane
-        BorderPane menuPane = new BorderPane();
-        menuPane.setPadding(new Insets(10));
-        menuPane.setStyle("-fx-background-color: #EDEDED");
-        //     BorderPane menuPane = createMenuPane();
-
-        // Napis w MENU
-        Label titleLabel = new Label("INFORMACJE O LABIRYNCIE");
-        titleLabel.setStyle("-fx-background-color: #8B4513; -fx-text-fill: white; -fx-font-size: 16; -fx-padding: 5;");
-        titleLabel.setPrefWidth(250);
-        titleLabel.setAlignment(Pos.CENTER);
-
-        Pane titlePane = new Pane();
-        titlePane.setStyle("-fx-background-color: #EDEDED");
-        titlePane.getChildren().add(titleLabel);
-
-        // Dodawanie etykiet z informacjami o obrazku
-        Label widthLabel = new Label("Width: " + WIDTH);
-        Label heightLabel = new Label("Height: " + HEIGHT);
-        Label pixelSizeLabel = new Label("Pixel Size: " + PIXEL_SIZE);
-
-        //Tworzenie przyciskow
-        Button button1 = new Button("Przycisk 1");
-        Button button2 = new Button("Przycisk 2");
-
-        HBox.setMargin(button1, new Insets(5));
-        HBox.setMargin(button2, new Insets(5));
-
-
-        //TitleBox
-        HBox titleBox = new HBox(titlePane);
-        titleBox.setSpacing(10);
-        titleBox.setPadding(new Insets(10));
-
-        //InfoBox
-        HBox infoBox = new HBox(widthLabel, heightLabel, pixelSizeLabel);
-        infoBox.setSpacing(10);
-        infoBox.setPadding(new Insets(10));
-
-        //MazeBox
-        BorderPane mazeBox = new BorderPane();
-
-        //ButtonBox
-        HBox buttonBox = new HBox(button1, button2);
-        buttonBox.setSpacing(10);
-        buttonBox.setPadding(new Insets(10));
-
-        menuPane.setTop(titleBox);
-        menuPane.setCenter(infoBox);
-        menuPane.setBottom(buttonBox);
-
-        Canvas canvas = new Canvas
+        this.canvas = new Canvas
                 /**
                  *  Rozmiar calego obrazka to:
                  *  @Szerokosc (ilosc pol w poziomie * rozmiar pola) + (ilosc pol w poziomie * rozmiar ramki)
@@ -158,51 +65,12 @@ public class TablicaObraz extends Application {
                  */
                 (WIDTH * PIXEL_SIZE + (WIDTH * FRAME_SIZE),
                         HEIGHT * PIXEL_SIZE + (HEIGHT * FRAME_SIZE));
-        GraphicsContext gc = canvas.getGraphicsContext2D();
-
-   //     this.tabl = tablica;
-
-        // Przed tym nalezy wczytac tablice
-        drawPixels(gc);
-
-        /**
-        Obsluga zdarzen powinna byc przeniesiona do package'u 'controllers'
-
-         */
-
-        // Obsługa zdarzenia przycisku 1
-        button1.setOnAction(event -> {
-            // Czyszczenie płótna
-            gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
-        });
+        this.gc = canvas.getGraphicsContext2D();
 
 
-        button2.setOnMouseEntered(mouseEvent -> {
-            button2.setText("Najechany");
-        });
-        button2.setOnMouseExited(mouseEvent -> {
-            button2.setText("Przycisk 2");
-        });
-  /*      button2.setOnAction(actionEvent -> {
-            //Stworz nowy labirynt
-            MazeTest maze2 = new MazeTest(14); //todo zczytuj z TextField
-
-            this.tabl = maze2.dfsMazeCreator();
-
-            this.HEIGHT = this.tabl.length;
-            this.WIDTH = this.tabl.length;
-
-            // Zmiana rozmiaru płótna
-            canvas.setWidth(this.HEIGHT);
-            canvas.setHeight(this.WIDTH);
-
-            // Pobranie nowego GraphicsContext
-            GraphicsContext ga = canvas.getGraphicsContext2D();
-
-            // Ponowne wypełnienie płótna
-            drawPixels(ga);
-        }); */
-
+        System.out.println("Canvas width = " + this.canvas.getWidth());
+        System.out.println("Canvas height = " + this.canvas.getHeight());
+        drawPixels(this.gc);
 
         BorderPane borderPane = new BorderPane();
         borderPane.setCenter(canvas);
@@ -214,27 +82,247 @@ public class TablicaObraz extends Application {
         primaryStage.show();
     }
 
-  //  private BorderPane createMenuPane() {
-//    }
 
+    //@Todo - wszystkie style powinny byc w osobnym pliku (np. css)
+    //@Todo - wszystkie interakcje (przyciskow) powinny byc w osobnym pliku (package - controller)
+    private void createCanvas() {
+        /**
+         *  Rozmiar calego obrazka to:
+         *  @Szerokosc (ilosc pol w poziomie * rozmiar pola) + (ilosc pol w poziomie * rozmiar ramki)
+         *  @Wysokosc (ilosc pol w pionie * rozmiar pola) + (ilosc pol w pionie * rozmiar ramki)
+         */
+
+        this.FRAME_SIZE = countFrameSize();
+        this.PIXEL_SIZE = countPixelSize();
+
+        this.canvas.setWidth(WIDTH * PIXEL_SIZE + (WIDTH * FRAME_SIZE));
+        this.canvas.setHeight(HEIGHT * PIXEL_SIZE + (HEIGHT * FRAME_SIZE));
+
+        this.gc = canvas.getGraphicsContext2D();
+
+        drawPixels(this.gc);
+    }
+
+    private double countFrameSize() {
+        double size = 540;
+
+        size = size / this.WIDTH;
+
+        size = size/36;
+
+        return size;
+    }
+
+    private double countPixelSize(){
+        return countFrameSize() * 35;
+    }
+
+    private void createDefaultMaze(int size) {
+        MazeTest mazeTest = new MazeTest(size);
+        int[][] tabMaze = mazeTest.dfsMazeCreator();
+        this.tabl = tabMaze;
+        this.HEIGHT = tabMaze.length;
+        this.WIDTH = tabMaze.length;
+    }
+
+    /**
+     *  OGÓLNY UKŁAD:
+     *  BORDERPANE {
+     *      CENTER - MazeVisualization
+     *      RIGHT - MenuPane
+     * <p>
+     *      BORDERPANE - MenuPane {
+     *          TOP - TitleBox
+     *          CENTER - InfoBox
+     *          CENTER - MazeBox
+     *          BOTTOM - ButtonBox
+     *          }
+     *      }
+     *
+     */
+    private BorderPane createMenuPane() {
+        BorderPane menuPane = new BorderPane();
+        menuPane.setPadding(new Insets(10));
+        menuPane.setStyle("-fx-background-color: #9966CC");
+
+        HBox titleBox = createTitleBox();
+        titleBox.setSpacing(10);
+        titleBox.setPadding(new Insets(10));
+
+
+        VBox infoBox = createInfoBox();
+        VBox userInterfaceBox = createUIBox();
+        HBox buttonBox = createButtonBox();
+
+        menuPane.setTop(titleBox);
+        menuPane.setCenter(infoBox);
+        menuPane.setRight(userInterfaceBox);
+        menuPane.setBottom(buttonBox);
+
+        return menuPane;
+    }
+
+    private HBox createTitleBox() {
+        // Napis w MENU
+        Label titleLabel = new Label("INFORMACJE O LABIRYNCIE");
+        titleLabel.setStyle("-fx-background-color: #4CAF50; -fx-text-fill: white; -fx-font-size: 16px; -fx-padding: 5px; -fx-border-color: #000000; -fx-border-width: 2px; -fx-border-radius: 5px;");
+        titleLabel.setPrefWidth(300);
+        titleLabel.setAlignment(Pos.CENTER);
+
+        Pane titlePane = new Pane();
+        titlePane.setStyle("-fx-background-color: #EDEDED");
+        titlePane.getChildren().add(titleLabel);
+
+        return new HBox(titlePane);
+    }
+
+    private VBox createInfoBox() {
+        // Dodawanie etykiet z informacjami o obrazku
+        widthLabel.setText("Width: " + WIDTH);
+        heightLabel.setText("Height: " + HEIGHT);
+        pixelSizeLabel.setText("Pixel Size: " + PIXEL_SIZE);
+
+
+        //STYL
+        //   String labelStyle = "-fx-background-color: #4BAF51; -fx-text-fill: white; -fx-font-size: 16; -fx-padding: 5;";
+
+        String labelStyle = "-fx-background-color: #4CAF50; -fx-text-fill: white; -fx-font-size: 16; -fx-padding: 5; -fx-border-color: black; -fx-border-width: 2px; -fx-border-radius: 5px;";
+
+        widthLabel.setStyle(labelStyle);
+        heightLabel.setStyle(labelStyle);
+        pixelSizeLabel.setStyle(labelStyle);
+
+
+
+
+        VBox infoBox = new VBox(widthLabel, heightLabel, pixelSizeLabel);
+        infoBox.setSpacing(10);
+        infoBox.setPadding(new Insets(10));
+
+        return infoBox;
+    }
+
+    private VBox createUIBox() {
+
+        VBox userInterfaceBox = new VBox();
+        userInterfaceBox.setSpacing(10);
+        userInterfaceBox.setPadding(new Insets(10));
+
+        ObservableList<Integer> numbers = FXCollections.observableArrayList();
+        for (int i = 4; i <= 40 ; i++) {
+            numbers.add(i);
+        }
+
+        ChoiceBox<Integer> mazeSizeChoiceBox = new ChoiceBox<>(numbers);
+        mazeSizeChoiceBox.getSelectionModel().select(Integer.valueOf("15")); //domyslna wartosc = 15
+
+
+
+        //STYL
+        mazeSizeChoiceBox.setStyle("-fx-background-color: #4CAF50; -fx-text-fill: white; -fx-font-size: 14px; -fx-padding: 10px; -fx-border-color: #000000; -fx-border-width: 2px;");
+
+
+        mazeSizeChoiceBox.setOnAction(actionEvent -> {
+            int selectedNumber = mazeSizeChoiceBox.getValue();
+            System.out.println("Wybrana liczba: " + selectedNumber);
+            this.SELECTED_SIZE_BY_USER = selectedNumber;
+
+        });
+
+        userInterfaceBox.getChildren().add(mazeSizeChoiceBox);
+
+        return userInterfaceBox;
+
+    }
+
+    private void refreshInfoBox() {
+        // Zaokrąglenie wartości PIXEL_SIZE do dwóch miejsc po przecinku
+        String formattedPixelSize = String.format("%.2f", PIXEL_SIZE);
+
+        widthLabel.setText("Width: " + WIDTH);
+        heightLabel.setText("Height: " + HEIGHT);
+        pixelSizeLabel.setText("Pixel Size: " + formattedPixelSize);
+    }
+    private HBox createButtonBox() {
+        //Tworzenie przyciskow
+        Button button1 = new Button("Resetuj labirynt");
+        Button button2 = new Button("Wygeneruj nowy labirynt");
+
+        //Dodawanie stylu CSS
+        String originalButtonStyle = "-fx-background-color: #4CAF50; -fx-text-fill: white; -fx-font-size: 14px; -fx-padding: 10px; -fx-border-color: #000000; -fx-border-width: 2px;";
+        button1.setStyle(originalButtonStyle);
+
+        button1.setScaleX(1.05);
+        button1.setScaleY(1.05);
+        Font font1 = button1.getFont();
+        button1.setFont(Font.font(font1.getName(), FontWeight.BOLD, font1.getSize() + 2));
+        button1.setEffect(new DropShadow());
+
+        // Zdarzenia
+        button1.setOnMouseEntered(e -> button1.setStyle(originalButtonStyle + "-fx-background-color: #45a049;"));
+        button1.setOnMouseExited(e -> button1.setStyle(originalButtonStyle));
+        button1.setOnMousePressed(e -> button1.setStyle(originalButtonStyle + "-fx-background-color: #3e8e41;"));
+        button1.setOnMouseReleased(e -> button1.setStyle(originalButtonStyle + "-fx-background-color: #45a049;"));
+
+        button2.setStyle(originalButtonStyle);
+
+        button2.setScaleX(1.05);
+        button2.setScaleY(1.05);
+        Font font2 = button2.getFont();
+        button2.setFont(Font.font(font2.getName(), FontWeight.BOLD, font2.getSize() + 2));
+        button2.setEffect(new DropShadow());
+
+        // Zdarzenia
+        button2.setOnMouseEntered(e -> button2.setStyle(originalButtonStyle + "-fx-background-color: #45a049;"));
+        button2.setOnMouseExited(e -> button2.setStyle(originalButtonStyle));
+        button2.setOnMousePressed(e -> button2.setStyle(originalButtonStyle + "-fx-background-color: #3e8e41;"));
+        button2.setOnMouseReleased(e -> button2.setStyle(originalButtonStyle + "-fx-background-color: #45a049;"));
+
+
+        HBox.setMargin(button1, new Insets(7));
+        HBox.setMargin(button2, new Insets(7));
+
+
+        /**
+         Obsluga zdarzen powinna byc przeniesiona do package'u 'controllers'
+         */
+
+        // Obsługa zdarzenia przycisku 1
+        button1.setOnAction(event -> {
+            // Czyszczenie płótna
+            gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
+        });
+
+
+ /*       button2.setOnMouseEntered(mouseEvent -> {
+            button2.setText("Najechany");
+        });
+        button2.setOnMouseExited(mouseEvent -> {
+            button2.setText("Przycisk 2");
+        });
+*/
+
+
+        //Tworzymy labirynt o rozmiarze podanym przez uzytkownika
+        button2.setOnAction(actionEvent -> {
+            createDefaultMaze(this.SELECTED_SIZE_BY_USER);
+            createCanvas();
+            refreshInfoBox();
+        });
+
+        return new HBox(button1, button2);
+    }
+
+    /**
+     * TODO - GraphicsContext sie zmienia, bo tworzymy nowa instancje Canvas,
+     * Po kazdym wywowalniu CreateCanvas, nalezy to jakos zmienic, zmodyfikowac
+     * @param gc
+     */
     private void drawPixels(GraphicsContext gc) {
-        //todo Sprawdzic i ewentualnie zamienic "x" z "y"
         for (int y = 0; y < HEIGHT; y++) {
             for (int x = 0; x < WIDTH; x++) {
                 int pixelValue = tabl[y][x];
                 Color pixelColor = getColorForValue(pixelValue);
-                //Dla scianki zwiekszamy rozmiar ramki
-
-                //todo Efekt 3D - to consider
-            /*    if (pixelValue == 2) {
-                    FRAME_SIZE = 3;
-                }
-                else {
-                    FRAME_SIZE = 1;
-                }
-
-                ///
-*/
 
                 gc.setFill(pixelColor);
                 gc.fillRect(
@@ -243,6 +331,7 @@ public class TablicaObraz extends Application {
                         PIXEL_SIZE,
                         PIXEL_SIZE
                 );
+
                 gc.setStroke(Color.BLACK); // Kolor ramki
                 gc.setLineWidth(FRAME_SIZE); // Grubosc ramki
                 gc.strokeRect(
@@ -253,29 +342,31 @@ public class TablicaObraz extends Application {
                 );
             }
         }
-    }
 
-    private void loadArrayFromFile(String filename) {
-        try {
-            File file = new File(filename);
-            Scanner scanner = new Scanner(file);
-
-            int height = scanner.nextInt();
-            int width = scanner.nextInt();
-
-            this.HEIGHT = scanner.nextInt();
-            this.WIDTH = scanner.nextInt();
-
-            this.tabl = new int[height][width];
-
-            for (int row = 0; row < height; row++) {
-                for (int col = 0; col < width; col++) {
-                    this.tabl[row][col] = scanner.nextInt();
+        for (int y = 0; y < HEIGHT; y++) {
+            for (int x = 0; x < WIDTH; x++) {
+                int pixelValue = tabl[y][x];
+                Color pixelColor = getColorForValue(pixelValue);
+                gc.setFill(pixelColor);
+                //Dla scian Efekt 3D
+                double modifier = PIXEL_SIZE / 15;
+                if (pixelValue == 2 || pixelValue == 0) {
+                    gc.fillRect(
+                            x * (PIXEL_SIZE + FRAME_SIZE) + modifier,
+                            y * (PIXEL_SIZE + FRAME_SIZE) + modifier,
+                            PIXEL_SIZE + modifier,
+                            PIXEL_SIZE + modifier
+                    );
+                    gc.setStroke(Color.BLACK); // Kolor ramki
+                    gc.setLineWidth(FRAME_SIZE); // Grubosc ramki
+                    gc.strokeRect(
+                            x * (PIXEL_SIZE + FRAME_SIZE) + modifier,
+                            y * (PIXEL_SIZE + FRAME_SIZE) + modifier,
+                            PIXEL_SIZE + modifier,
+                            PIXEL_SIZE + modifier
+                    );
                 }
             }
-            scanner.close();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
         }
     }
 
