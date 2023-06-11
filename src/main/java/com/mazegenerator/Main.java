@@ -6,19 +6,17 @@ import java.util.List;
 public class Main {
     public static void main(String[] args) {
 
-        MazeTest mazeTest = new MazeTest(20);
+        MazeGenerator maze = new MazeGenerator(20);
 
         List<Integer> arrayList = new ArrayList<>();
         List<Integer> test2 = new ArrayList<>();
 
-
     //    mazeTest.printUnvisitedNeighbours(0, 4);
 
         int [][] generatedMaze;
-        generatedMaze = mazeTest.dfsMazeCreator();
+        generatedMaze = maze.dfsMazeCreator();
         System.out.println("Result: ");
-        mazeTest.printTable();
+        maze.printTable();
 
-     //   TablicaObraz tablicaObraz = new TablicaObraz(generatedMaze);
     }
 }

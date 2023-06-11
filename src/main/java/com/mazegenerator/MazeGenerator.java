@@ -2,7 +2,7 @@ package com.mazegenerator;
 
 import java.util.*;
 
-public class MazeTest {
+public class MazeGenerator {
 
     //wstepnie
     int mazeSize = 0;
@@ -12,14 +12,14 @@ public class MazeTest {
      * 0 - definiujemy na starcie
      * 1 - sciezka
      * 2 - sciana
+     * 3 - poczatek/koniec
      */
     int[][] tableOfFields;
 
 //    HashSet<Field> visitedFields = new HashSet<>();
     HashSet<List<Integer>> visitedFields = new HashSet<>();
 
-
-    public MazeTest(int mazeSize) {
+    public MazeGenerator(int mazeSize) {
         this.mazeSize = mazeSize;
         this.tableOfFields = new int[mazeSize][mazeSize];
 
@@ -30,14 +30,6 @@ public class MazeTest {
         }
     }
 
- /*   public void drawMaze(List<Integer> startField, List<Integer> finishField) {
-        int xStart = startField.get(0);
-        int yStart = startField.get(1);
-
-        int xFinish = finishField.get(0);
-        int yFinish = finishField.get(1);
-*/
-
     private int drawStartYField(){
         Random random = new Random();
 
@@ -45,10 +37,34 @@ public class MazeTest {
 
         return startY;
     }
+    private int chooseEndField() {
+
+        List<Integer> endFile = new ArrayList<>();
+
+        int i = this.tableOfFields.length -1;
+        for (int j = 0; j < tableOfFields.length; j++) {
+            System.out.print(this.tableOfFields[j][i] + ", ");
+            if (this.tableOfFields[j][i] == 1) {
+                endFile.add(j);
+            }
+        }
+        System.out.println("----------");
+
+        Random random = new Random();
+        int randomIndex = random.nextInt(endFile.size());
+
+        System.out.println("Mozliwe wartosci: ");
+        for (Integer integer : endFile) {
+            System.out.print(integer + ", ");
+        }
+        System.out.println();
+        System.out.println("Losowa wartość: " + randomIndex);
+
+        return endFile.get(randomIndex);
+    }
 
     public int[][] dfsMazeCreator() {
-//        int startY = this.drawStartYField();
-        int startY = 1;
+        int startY = this.drawStartYField();
         List<List<Integer>> result = new ArrayList<>();
         List<Integer> startField = new ArrayList<>();
         startField.add(0);
@@ -66,7 +82,8 @@ public class MazeTest {
         //Oznaczamy pola:
         //@Poczatek i @Koniec
 
-        this.tableOfFields[1][0] = 3;
+        this.tableOfFields[startY][0] = 3;
+        this.tableOfFields[chooseEndField()][this.tableOfFields.length-1] = 3;
 
         return this.tableOfFields;
     }
@@ -78,9 +95,7 @@ public class MazeTest {
 
         printTable();
 
-
         List<List<Integer>> neigbours = printUnvisitedNeighbours(startField.get(0), startField.get(1));
-
 
         Iterator<List<Integer>> iterator = neigbours.iterator();
         //Sprawdzamy czy do tych pol bedziemy mogli w ogole wejsc
@@ -108,17 +123,14 @@ public class MazeTest {
             }
         }
 
-
         if (!neigbours.isEmpty()) {
             Collections.shuffle(neigbours);
         }
-
         for (List<Integer> neigbour : neigbours) {
             if(!(visitedFields.contains(neigbour)) && this.tableOfFields[neigbour.get(0)][neigbour.get(1)] != 2) {
                 dfs_recur(neigbour, result);
             }
         }
-
     }
 
     /**
@@ -168,8 +180,6 @@ public class MazeTest {
         return false;
     }
 
-
-
  /*   public boolean IsMovementPossible(int actualX, int actualY, int potentialX, int potentialY) {
         //Ruch w gore
         if (potentialX < actualX && potentialY == actualY) {
@@ -187,7 +197,6 @@ public class MazeTest {
 
         }
     }
-
 
   */
     public void printTable() {

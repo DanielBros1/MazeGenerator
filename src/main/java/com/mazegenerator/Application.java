@@ -1,6 +1,5 @@
 package com.mazegenerator;
 
-import javafx.application.Application;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
@@ -23,7 +22,7 @@ import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 
 
-public class TablicaObraz extends Application {
+public class Application extends javafx.application.Application {
 
     private int WIDTH;
     private int HEIGHT;
@@ -118,8 +117,8 @@ public class TablicaObraz extends Application {
     }
 
     private void createDefaultMaze(int size) {
-        MazeTest mazeTest = new MazeTest(size);
-        int[][] tabMaze = mazeTest.dfsMazeCreator();
+        MazeGenerator maze = new MazeGenerator(size);
+        int[][] tabMaze = maze.dfsMazeCreator();
         this.tabl = tabMaze;
         this.HEIGHT = tabMaze.length;
         this.WIDTH = tabMaze.length;
@@ -148,7 +147,6 @@ public class TablicaObraz extends Application {
         HBox titleBox = createTitleBox();
         titleBox.setSpacing(10);
         titleBox.setPadding(new Insets(10));
-
 
         VBox infoBox = createInfoBox();
         VBox userInterfaceBox = createUIBox();
@@ -182,18 +180,12 @@ public class TablicaObraz extends Application {
         heightLabel.setText("Height: " + HEIGHT);
         pixelSizeLabel.setText("Pixel Size: " + PIXEL_SIZE);
 
-
         //STYL
-        //   String labelStyle = "-fx-background-color: #4BAF51; -fx-text-fill: white; -fx-font-size: 16; -fx-padding: 5;";
-
         String labelStyle = "-fx-background-color: #4CAF50; -fx-text-fill: white; -fx-font-size: 16; -fx-padding: 5; -fx-border-color: black; -fx-border-width: 2px; -fx-border-radius: 5px;";
 
         widthLabel.setStyle(labelStyle);
         heightLabel.setStyle(labelStyle);
         pixelSizeLabel.setStyle(labelStyle);
-
-
-
 
         VBox infoBox = new VBox(widthLabel, heightLabel, pixelSizeLabel);
         infoBox.setSpacing(10);
@@ -216,11 +208,8 @@ public class TablicaObraz extends Application {
         ChoiceBox<Integer> mazeSizeChoiceBox = new ChoiceBox<>(numbers);
         mazeSizeChoiceBox.getSelectionModel().select(Integer.valueOf("15")); //domyslna wartosc = 15
 
-
-
         //STYL
         mazeSizeChoiceBox.setStyle("-fx-background-color: #4CAF50; -fx-text-fill: white; -fx-font-size: 14px; -fx-padding: 10px; -fx-border-color: #000000; -fx-border-width: 2px;");
-
 
         mazeSizeChoiceBox.setOnAction(actionEvent -> {
             int selectedNumber = mazeSizeChoiceBox.getValue();
@@ -278,10 +267,8 @@ public class TablicaObraz extends Application {
         button2.setOnMousePressed(e -> button2.setStyle(originalButtonStyle + "-fx-background-color: #3e8e41;"));
         button2.setOnMouseReleased(e -> button2.setStyle(originalButtonStyle + "-fx-background-color: #45a049;"));
 
-
         HBox.setMargin(button1, new Insets(7));
         HBox.setMargin(button2, new Insets(7));
-
 
         /**
          Obsluga zdarzen powinna byc przeniesiona do package'u 'controllers'
@@ -292,15 +279,6 @@ public class TablicaObraz extends Application {
             // Czyszczenie płótna
             gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
         });
-
-
- /*       button2.setOnMouseEntered(mouseEvent -> {
-            button2.setText("Najechany");
-        });
-        button2.setOnMouseExited(mouseEvent -> {
-            button2.setText("Przycisk 2");
-        });
-*/
 
 
         //Tworzymy labirynt o rozmiarze podanym przez uzytkownika
