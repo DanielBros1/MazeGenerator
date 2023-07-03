@@ -21,16 +21,18 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 
+import java.util.List;
+
 
 public class Application extends javafx.application.Application {
 
     private int WIDTH;
     private int HEIGHT;
     private double PIXEL_SIZE = 35;
-    private double FRAME_SIZE = 1; // Rozmiar ramki
-    private int SELECTED_SIZE_BY_USER = 15;
+    private double FRAME_SIZE = 1;
+    private int SELECTED_SIZE_BY_USER = 15; //default size
 
-    private int[][] tabl;
+    private int[][] table;
 
     private GraphicsContext gc;
     private Canvas canvas;
@@ -47,25 +49,34 @@ public class Application extends javafx.application.Application {
     @Override
     public void start(Stage primaryStage) {
 
-        //Tworzenie labiryntu
+        //Creating a default maze
         createDefaultMaze(15);
 
-        primaryStage.setTitle("Tablica Obraz");
-        Group root = new Group(); //todo wyjasnic
+        primaryStage.setTitle("Maze generator - App");
+        Group root = new Group();
 
-        //Uklad wyswietlania programu
+        // Creating scene and load style.css
+        Scene scene = new Scene(root);
+        scene.getStylesheets().add(getClass().getResource("/style.css").toExternalForm());
+
+        List<String> stylesheets = scene.getStylesheets();
+        for (String stylesheet : stylesheets) {
+            System.out.println("Załadowano styl: " + stylesheet);
+        }
+
+
+        //Application layout
         BorderPane menuPane = createMenuPane();
 
         this.canvas = new Canvas
                 /**
-                 *  Rozmiar calego obrazka to:
-                 *  @Szerokosc (ilosc pol w poziomie * rozmiar pola) + (ilosc pol w poziomie * rozmiar ramki)
-                 *  @Wysokosc (ilosc pol w pionie * rozmiar pola) + (ilosc pol w pionie * rozmiar ramki)
+                 *  The size of the entire image:
+                 *  @Width (number of horizontal cells * cell size) + (number of horizontal cells * frame size)
+                 *  @Height (number of vertical cells * cell size) + (number of vertical cells * frame size)
                  */
                 (WIDTH * PIXEL_SIZE + (WIDTH * FRAME_SIZE),
                         HEIGHT * PIXEL_SIZE + (HEIGHT * FRAME_SIZE));
         this.gc = canvas.getGraphicsContext2D();
-
 
         System.out.println("Canvas width = " + this.canvas.getWidth());
         System.out.println("Canvas height = " + this.canvas.getHeight());
@@ -76,7 +87,10 @@ public class Application extends javafx.application.Application {
         borderPane.setRight(menuPane);
 
         root.getChildren().add(borderPane);
-        primaryStage.setScene(new Scene(root));
+
+
+
+        primaryStage.setScene(scene);
 
         primaryStage.show();
     }
@@ -104,12 +118,7 @@ public class Application extends javafx.application.Application {
 
     private double countFrameSize() {
         double size = 540;
-
-        size = size / this.WIDTH;
-
-        size = size/36;
-
-        return size;
+        return size/ (this.WIDTH * 36);
     }
 
     private double countPixelSize(){
@@ -119,7 +128,7 @@ public class Application extends javafx.application.Application {
     private void createDefaultMaze(int size) {
         MazeGenerator maze = new MazeGenerator(size);
         int[][] tabMaze = maze.dfsMazeCreator();
-        this.tabl = tabMaze;
+        this.table = tabMaze;
         this.HEIGHT = tabMaze.length;
         this.WIDTH = tabMaze.length;
     }
@@ -238,34 +247,40 @@ public class Application extends javafx.application.Application {
         Button button2 = new Button("Wygeneruj nowy labirynt");
 
         //Dodawanie stylu CSS
-        String originalButtonStyle = "-fx-background-color: #4CAF50; -fx-text-fill: white; -fx-font-size: 14px; -fx-padding: 10px; -fx-border-color: #000000; -fx-border-width: 2px;";
-        button1.setStyle(originalButtonStyle);
+ //       String originalButtonStyle = "-fx-background-color: #4CAF50; -fx-text-fill: white; -fx-font-size: 14px; -fx-padding: 10px; -fx-border-color: #000000; -fx-border-width: 2px;";
+//        button1.setStyle(originalButtonStyle);
+        button1.getStyleClass().add("button-style");
+        button2.getStyleClass().add("button-style");
 
         button1.setScaleX(1.05);
         button1.setScaleY(1.05);
         Font font1 = button1.getFont();
         button1.setFont(Font.font(font1.getName(), FontWeight.BOLD, font1.getSize() + 2));
         button1.setEffect(new DropShadow());
+        ///////////////////////
 
         // Zdarzenia
-        button1.setOnMouseEntered(e -> button1.setStyle(originalButtonStyle + "-fx-background-color: #45a049;"));
-        button1.setOnMouseExited(e -> button1.setStyle(originalButtonStyle));
-        button1.setOnMousePressed(e -> button1.setStyle(originalButtonStyle + "-fx-background-color: #3e8e41;"));
-        button1.setOnMouseReleased(e -> button1.setStyle(originalButtonStyle + "-fx-background-color: #45a049;"));
+  //      button1.setOnMouseEntered(e -> button1.setStyle(originalButtonStyle + "-fx-background-color: #45a049;"));
+  //      button1.setOnMouseExited(e -> button1.setStyle(originalButtonStyle));
+  //      button1.setOnMousePressed(e -> button1.setStyle(originalButtonStyle + "-fx-background-color: #3e8e41;"));
+  //      button1.setOnMouseReleased(e -> button1.setStyle(originalButtonStyle + "-fx-background-color: #45a049;"));
 
-        button2.setStyle(originalButtonStyle);
+
+        // STYL
+   //     button2.setStyle(originalButtonStyle);
 
         button2.setScaleX(1.05);
         button2.setScaleY(1.05);
         Font font2 = button2.getFont();
         button2.setFont(Font.font(font2.getName(), FontWeight.BOLD, font2.getSize() + 2));
         button2.setEffect(new DropShadow());
+        /////////////////
 
         // Zdarzenia
-        button2.setOnMouseEntered(e -> button2.setStyle(originalButtonStyle + "-fx-background-color: #45a049;"));
-        button2.setOnMouseExited(e -> button2.setStyle(originalButtonStyle));
-        button2.setOnMousePressed(e -> button2.setStyle(originalButtonStyle + "-fx-background-color: #3e8e41;"));
-        button2.setOnMouseReleased(e -> button2.setStyle(originalButtonStyle + "-fx-background-color: #45a049;"));
+   //     button2.setOnMouseEntered(e -> button2.setStyle(originalButtonStyle + "-fx-background-color: #45a049;"));
+   //     button2.setOnMouseExited(e -> button2.setStyle(originalButtonStyle));
+   //     button2.setOnMousePressed(e -> button2.setStyle(originalButtonStyle + "-fx-background-color: #3e8e41;"));
+   //     button2.setOnMouseReleased(e -> button2.setStyle(originalButtonStyle + "-fx-background-color: #45a049;"));
 
         HBox.setMargin(button1, new Insets(7));
         HBox.setMargin(button2, new Insets(7));
@@ -280,7 +295,6 @@ public class Application extends javafx.application.Application {
             gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
         });
 
-
         //Tworzymy labirynt o rozmiarze podanym przez uzytkownika
         button2.setOnAction(actionEvent -> {
             createDefaultMaze(this.SELECTED_SIZE_BY_USER);
@@ -292,14 +306,14 @@ public class Application extends javafx.application.Application {
     }
 
     /**
-     * TODO - GraphicsContext sie zmienia, bo tworzymy nowa instancje Canvas,
-     * Po kazdym wywowalniu CreateCanvas, nalezy to jakos zmienic, zmodyfikowac
-     * @param gc
+     * Funkcja rysuje pola na planszy
+     * @param gc - Kontekst graficzny, na ktorym rysujemy
      */
+
     private void drawPixels(GraphicsContext gc) {
         for (int y = 0; y < HEIGHT; y++) {
             for (int x = 0; x < WIDTH; x++) {
-                int pixelValue = tabl[y][x];
+                int pixelValue = table[y][x];
                 Color pixelColor = getColorForValue(pixelValue);
 
                 gc.setFill(pixelColor);
@@ -310,9 +324,9 @@ public class Application extends javafx.application.Application {
                         PIXEL_SIZE
                 );
 
-                gc.setStroke(Color.BLACK); // Kolor ramki
-                gc.setLineWidth(FRAME_SIZE); // Grubosc ramki
-                gc.strokeRect(
+                gc.setStroke(Color.BLACK); // Frame color
+                gc.setLineWidth(FRAME_SIZE); // Frame size
+                gc.strokeRect( //Function draws rectangle
                         x * (PIXEL_SIZE + FRAME_SIZE),
                         y * (PIXEL_SIZE + FRAME_SIZE),
                         PIXEL_SIZE,
@@ -323,7 +337,7 @@ public class Application extends javafx.application.Application {
 
         for (int y = 0; y < HEIGHT; y++) {
             for (int x = 0; x < WIDTH; x++) {
-                int pixelValue = tabl[y][x];
+                int pixelValue = table[y][x];
                 Color pixelColor = getColorForValue(pixelValue);
                 gc.setFill(pixelColor);
                 //Dla scian Efekt 3D
@@ -335,9 +349,9 @@ public class Application extends javafx.application.Application {
                             PIXEL_SIZE + modifier,
                             PIXEL_SIZE + modifier
                     );
-                    gc.setStroke(Color.BLACK); // Kolor ramki
-                    gc.setLineWidth(FRAME_SIZE); // Grubosc ramki
-                    gc.strokeRect(
+                    gc.setStroke(Color.BLACK); // Frame color
+                    gc.setLineWidth(FRAME_SIZE); // Frame size
+                    gc.strokeRect( //Function draws rectangle
                             x * (PIXEL_SIZE + FRAME_SIZE) + modifier,
                             y * (PIXEL_SIZE + FRAME_SIZE) + modifier,
                             PIXEL_SIZE + modifier,
@@ -352,7 +366,7 @@ public class Application extends javafx.application.Application {
         switch (value) {
             case 0:
             case 2:
-                return Color.DARKGOLDENROD.darker().darker(); // Ustawienie ciemniejszego koloru niż DARKGOLDENROD
+                return Color.DARKGOLDENROD.darker().darker();
             case 1:
                 return Color.KHAKI.brighter();
             case 3:

@@ -3,8 +3,6 @@ package com.mazegenerator;
 import java.util.*;
 
 public class MazeGenerator {
-
-    //wstepnie
     int mazeSize = 0;
 
     /**
@@ -16,7 +14,6 @@ public class MazeGenerator {
      */
     int[][] tableOfFields;
 
-//    HashSet<Field> visitedFields = new HashSet<>();
     HashSet<List<Integer>> visitedFields = new HashSet<>();
 
     public MazeGenerator(int mazeSize) {
@@ -43,7 +40,6 @@ public class MazeGenerator {
 
         int i = this.tableOfFields.length -1;
         for (int j = 0; j < tableOfFields.length; j++) {
-            System.out.print(this.tableOfFields[j][i] + ", ");
             if (this.tableOfFields[j][i] == 1) {
                 endFile.add(j);
             }
@@ -58,7 +54,7 @@ public class MazeGenerator {
             System.out.print(integer + ", ");
         }
         System.out.println();
-        System.out.println("Losowa wartość: " + randomIndex);
+        System.out.println("Losowa wartość: " + endFile.get(randomIndex));
 
         return endFile.get(randomIndex);
     }
