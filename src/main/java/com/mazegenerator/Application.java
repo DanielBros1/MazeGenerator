@@ -3,7 +3,6 @@ package com.mazegenerator;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
-import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
@@ -11,17 +10,15 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
-import javafx.scene.effect.DropShadow;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
-import javafx.scene.text.Font;
-import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 
 import java.util.List;
+import java.util.Objects;
 
 
 public class Application extends javafx.application.Application {
@@ -57,23 +54,18 @@ public class Application extends javafx.application.Application {
 
         // Creating scene and load style.css
         Scene scene = new Scene(root);
-        scene.getStylesheets().add(getClass().getResource("/style.css").toExternalForm());
+        scene.getStylesheets().add(Objects.requireNonNull(getClass().getResource("/style.css")).toExternalForm());
 
         List<String> stylesheets = scene.getStylesheets();
         for (String stylesheet : stylesheets) {
-            System.out.println("Załadowano styl: " + stylesheet);
+            System.out.println("Loaded style: " + stylesheet);
         }
-
 
         //Application layout
         BorderPane menuPane = createMenuPane();
 
         this.canvas = new Canvas
-                /**
-                 *  The size of the entire image:
-                 *  @Width (number of horizontal cells * cell size) + (number of horizontal cells * frame size)
-                 *  @Height (number of vertical cells * cell size) + (number of vertical cells * frame size)
-                 */
+
                 (WIDTH * PIXEL_SIZE + (WIDTH * FRAME_SIZE),
                         HEIGHT * PIXEL_SIZE + (HEIGHT * FRAME_SIZE));
         this.gc = canvas.getGraphicsContext2D();
@@ -88,21 +80,14 @@ public class Application extends javafx.application.Application {
 
         root.getChildren().add(borderPane);
 
-
-
         primaryStage.setScene(scene);
-
         primaryStage.show();
     }
-
-
-    //@Todo - wszystkie style powinny byc w osobnym pliku (np. css)
-    //@Todo - wszystkie interakcje (przyciskow) powinny byc w osobnym pliku (package - controller)
     private void createCanvas() {
-        /**
-         *  Rozmiar calego obrazka to:
-         *  @Szerokosc (ilosc pol w poziomie * rozmiar pola) + (ilosc pol w poziomie * rozmiar ramki)
-         *  @Wysokosc (ilosc pol w pionie * rozmiar pola) + (ilosc pol w pionie * rozmiar ramki)
+        /*
+         The size of the entire image:
+         Width = (number of horizontal cells * cell size) + (number of horizontal cells * frame size)
+         Height = (number of vertical cells * cell size) + (number of vertical cells * frame size)
          */
 
         this.FRAME_SIZE = countFrameSize();
@@ -127,25 +112,25 @@ public class Application extends javafx.application.Application {
 
     private void createDefaultMaze(int size) {
         MazeGenerator maze = new MazeGenerator(size);
-        int[][] tabMaze = maze.dfsMazeCreator();
-        this.table = tabMaze;
-        this.HEIGHT = tabMaze.length;
-        this.WIDTH = tabMaze.length;
+        int[][] mazeTable = maze.dfsMazeCreator();
+        this.table = mazeTable;
+        this.HEIGHT = mazeTable.length;
+        this.WIDTH = mazeTable.length;
     }
 
     /**
-     *  OGÓLNY UKŁAD:
-     *  BORDERPANE {
-     *      CENTER - MazeVisualization
-     *      RIGHT - MenuPane
+     * GENERAL LAYOUT:
+     * BORDERPANE {
+     *     CENTER - MazeVisualization
+     *     RIGHT - MenuPane
      * <p>
-     *      BORDERPANE - MenuPane {
-     *          TOP - TitleBox
-     *          CENTER - InfoBox
-     *          CENTER - MazeBox
-     *          BOTTOM - ButtonBox
-     *          }
-     *      }
+     *     BORDERPANE - MenuPane {
+     *         TOP - TitleBox
+     *         CENTER - InfoBox
+     *         CENTER - MazeBox
+     *         BOTTOM - ButtonBox
+     *     }
+     * }
      *
      */
     private BorderPane createMenuPane() {
@@ -170,11 +155,8 @@ public class Application extends javafx.application.Application {
     }
 
     private HBox createTitleBox() {
-        // Napis w MENU
-        Label titleLabel = new Label("INFORMACJE O LABIRYNCIE");
-        titleLabel.setStyle("-fx-background-color: #4CAF50; -fx-text-fill: white; -fx-font-size: 16px; -fx-padding: 5px; -fx-border-color: #000000; -fx-border-width: 2px; -fx-border-radius: 5px;");
-        titleLabel.setPrefWidth(300);
-        titleLabel.setAlignment(Pos.CENTER);
+        Label titleLabel = new Label("MAZE INFORMATION");
+        titleLabel.getStyleClass().add("titleLabel-style");
 
         Pane titlePane = new Pane();
         titlePane.setStyle("-fx-background-color: #EDEDED");
@@ -184,17 +166,15 @@ public class Application extends javafx.application.Application {
     }
 
     private VBox createInfoBox() {
-        // Dodawanie etykiet z informacjami o obrazku
+        // Adding labels with information about image
         widthLabel.setText("Width: " + WIDTH);
         heightLabel.setText("Height: " + HEIGHT);
         pixelSizeLabel.setText("Pixel Size: " + PIXEL_SIZE);
 
-        //STYL
-        String labelStyle = "-fx-background-color: #4CAF50; -fx-text-fill: white; -fx-font-size: 16; -fx-padding: 5; -fx-border-color: black; -fx-border-width: 2px; -fx-border-radius: 5px;";
-
-        widthLabel.setStyle(labelStyle);
-        heightLabel.setStyle(labelStyle);
-        pixelSizeLabel.setStyle(labelStyle);
+        //Adding .css style
+        widthLabel.getStyleClass().add("infoLabel-style");
+        heightLabel.getStyleClass().add("infoLabel-style");
+        pixelSizeLabel.getStyleClass().add("infoLabel-style");
 
         VBox infoBox = new VBox(widthLabel, heightLabel, pixelSizeLabel);
         infoBox.setSpacing(10);
@@ -215,26 +195,19 @@ public class Application extends javafx.application.Application {
         }
 
         ChoiceBox<Integer> mazeSizeChoiceBox = new ChoiceBox<>(numbers);
-        mazeSizeChoiceBox.getSelectionModel().select(Integer.valueOf("15")); //domyslna wartosc = 15
+        mazeSizeChoiceBox.getSelectionModel().select(Integer.valueOf("15")); //default size = 15
 
-        //STYL
-        mazeSizeChoiceBox.setStyle("-fx-background-color: #4CAF50; -fx-text-fill: white; -fx-font-size: 14px; -fx-padding: 10px; -fx-border-color: #000000; -fx-border-width: 2px;");
+        mazeSizeChoiceBox.getStyleClass().add("choice-box-style");
 
-        mazeSizeChoiceBox.setOnAction(actionEvent -> {
-            int selectedNumber = mazeSizeChoiceBox.getValue();
-            System.out.println("Wybrana liczba: " + selectedNumber);
-            this.SELECTED_SIZE_BY_USER = selectedNumber;
-
-        });
+        mazeSizeChoiceBox.setOnAction(actionEvent -> this.SELECTED_SIZE_BY_USER = mazeSizeChoiceBox.getValue());
 
         userInterfaceBox.getChildren().add(mazeSizeChoiceBox);
 
         return userInterfaceBox;
-
     }
 
     private void refreshInfoBox() {
-        // Zaokrąglenie wartości PIXEL_SIZE do dwóch miejsc po przecinku
+        // Round the PIXEL_SIZE value to two decimal places
         String formattedPixelSize = String.format("%.2f", PIXEL_SIZE);
 
         widthLabel.setText("Width: " + WIDTH);
@@ -242,72 +215,33 @@ public class Application extends javafx.application.Application {
         pixelSizeLabel.setText("Pixel Size: " + formattedPixelSize);
     }
     private HBox createButtonBox() {
-        //Tworzenie przyciskow
-        Button button1 = new Button("Resetuj labirynt");
-        Button button2 = new Button("Wygeneruj nowy labirynt");
+        Button resetButton = new Button("Reset maze");
+        Button createMazeButton = new Button("Create a new maze");
 
-        //Dodawanie stylu CSS
- //       String originalButtonStyle = "-fx-background-color: #4CAF50; -fx-text-fill: white; -fx-font-size: 14px; -fx-padding: 10px; -fx-border-color: #000000; -fx-border-width: 2px;";
-//        button1.setStyle(originalButtonStyle);
-        button1.getStyleClass().add("button-style");
-        button2.getStyleClass().add("button-style");
+        //Adding .css style
+        resetButton.getStyleClass().add("button-style");
+        createMazeButton.getStyleClass().add("button-style");
 
-        button1.setScaleX(1.05);
-        button1.setScaleY(1.05);
-        Font font1 = button1.getFont();
-        button1.setFont(Font.font(font1.getName(), FontWeight.BOLD, font1.getSize() + 2));
-        button1.setEffect(new DropShadow());
-        ///////////////////////
+        HBox.setMargin(resetButton, new Insets(7));
+        HBox.setMargin(createMazeButton, new Insets(7));
 
-        // Zdarzenia
-  //      button1.setOnMouseEntered(e -> button1.setStyle(originalButtonStyle + "-fx-background-color: #45a049;"));
-  //      button1.setOnMouseExited(e -> button1.setStyle(originalButtonStyle));
-  //      button1.setOnMousePressed(e -> button1.setStyle(originalButtonStyle + "-fx-background-color: #3e8e41;"));
-  //      button1.setOnMouseReleased(e -> button1.setStyle(originalButtonStyle + "-fx-background-color: #45a049;"));
-
-
-        // STYL
-   //     button2.setStyle(originalButtonStyle);
-
-        button2.setScaleX(1.05);
-        button2.setScaleY(1.05);
-        Font font2 = button2.getFont();
-        button2.setFont(Font.font(font2.getName(), FontWeight.BOLD, font2.getSize() + 2));
-        button2.setEffect(new DropShadow());
-        /////////////////
-
-        // Zdarzenia
-   //     button2.setOnMouseEntered(e -> button2.setStyle(originalButtonStyle + "-fx-background-color: #45a049;"));
-   //     button2.setOnMouseExited(e -> button2.setStyle(originalButtonStyle));
-   //     button2.setOnMousePressed(e -> button2.setStyle(originalButtonStyle + "-fx-background-color: #3e8e41;"));
-   //     button2.setOnMouseReleased(e -> button2.setStyle(originalButtonStyle + "-fx-background-color: #45a049;"));
-
-        HBox.setMargin(button1, new Insets(7));
-        HBox.setMargin(button2, new Insets(7));
-
-        /**
-         Obsluga zdarzen powinna byc przeniesiona do package'u 'controllers'
-         */
-
-        // Obsługa zdarzenia przycisku 1
-        button1.setOnAction(event -> {
-            // Czyszczenie płótna
+        // Button event handling
+        resetButton.setOnAction(event -> {
+            // Clear the canvas
             gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
         });
-
-        //Tworzymy labirynt o rozmiarze podanym przez uzytkownika
-        button2.setOnAction(actionEvent -> {
+        createMazeButton.setOnAction(actionEvent -> {
             createDefaultMaze(this.SELECTED_SIZE_BY_USER);
             createCanvas();
             refreshInfoBox();
         });
 
-        return new HBox(button1, button2);
+        return new HBox(resetButton, createMazeButton);
     }
 
     /**
-     * Funkcja rysuje pola na planszy
-     * @param gc - Kontekst graficzny, na ktorym rysujemy
+     * Function draws fields on the board
+     * @param gc - Graphical context to drawing
      */
 
     private void drawPixels(GraphicsContext gc) {
@@ -323,7 +257,6 @@ public class Application extends javafx.application.Application {
                         PIXEL_SIZE,
                         PIXEL_SIZE
                 );
-
                 gc.setStroke(Color.BLACK); // Frame color
                 gc.setLineWidth(FRAME_SIZE); // Frame size
                 gc.strokeRect( //Function draws rectangle
@@ -340,7 +273,7 @@ public class Application extends javafx.application.Application {
                 int pixelValue = table[y][x];
                 Color pixelColor = getColorForValue(pixelValue);
                 gc.setFill(pixelColor);
-                //Dla scian Efekt 3D
+                //3D Effect (wall)
                 double modifier = PIXEL_SIZE / 15;
                 if (pixelValue == 2 || pixelValue == 0) {
                     gc.fillRect(
@@ -363,19 +296,13 @@ public class Application extends javafx.application.Application {
     }
 
     private Color getColorForValue(int value) {
-        switch (value) {
-            case 0:
-            case 2:
-                return Color.DARKGOLDENROD.darker().darker();
-            case 1:
-                return Color.KHAKI.brighter();
-            case 3:
-                return Color.CHARTREUSE;
-            case 4:
-                return Color.CORNFLOWERBLUE;
-            default:
-                return Color.LAWNGREEN;
-        }
+        return switch (value) {
+            case 0, 2 -> Color.DARKGOLDENROD.darker().darker();
+            case 1 -> Color.KHAKI.brighter();
+            case 3 -> Color.CHARTREUSE;
+            case 4 -> Color.CORNFLOWERBLUE;
+            default -> Color.LAWNGREEN;
+        };
     }
 
 }

@@ -3,60 +3,53 @@ package com.mazegenerator;
 import java.util.*;
 
 public class MazeGenerator {
-    int mazeSize = 0;
+    int mazeSize;
 
     /**
-     * tableOfFields
-     * 0 - definiujemy na starcie
-     * 1 - sciezka
-     * 2 - sciana
-     * 3 - poczatek/koniec
+     * fieldTable
+     * 0 - initialized on start
+     * 1 - path
+     * 2 - wall
+     * 3 - start/end
      */
-    int[][] tableOfFields;
+    int[][] fieldTable;
 
     HashSet<List<Integer>> visitedFields = new HashSet<>();
 
     public MazeGenerator(int mazeSize) {
         this.mazeSize = mazeSize;
-        this.tableOfFields = new int[mazeSize][mazeSize];
+        this.fieldTable = new int[mazeSize][mazeSize];
 
-        for (int i = 0; i < this.tableOfFields.length; i++) {
-            for (int j = 0; j < tableOfFields.length; j++) {
-                this.tableOfFields[i][j] = 0;
+        for (int i = 0; i < this.fieldTable.length; i++) {
+            for (int j = 0; j < fieldTable.length; j++) {
+                this.fieldTable[i][j] = 0;
             }
         }
     }
 
     private int drawStartYField(){
         Random random = new Random();
-
-        int startY = random.nextInt(this.mazeSize);
-
-        return startY;
+        return random.nextInt(this.mazeSize);
     }
     private int chooseEndField() {
+        List<Integer> endFields = new ArrayList<>();
 
-        List<Integer> endFile = new ArrayList<>();
-
-        int i = this.tableOfFields.length -1;
-        for (int j = 0; j < tableOfFields.length; j++) {
-            if (this.tableOfFields[j][i] == 1) {
-                endFile.add(j);
+        int i = this.fieldTable.length -1;
+        for (int j = 0; j < fieldTable.length; j++) {
+            if (this.fieldTable[j][i] == 1) {
+                endFields.add(j);
             }
         }
+
         System.out.println("----------");
 
         Random random = new Random();
-        int randomIndex = random.nextInt(endFile.size());
+        int randomIndex = random.nextInt(endFields.size());
 
-        System.out.println("Mozliwe wartosci: ");
-        for (Integer integer : endFile) {
-            System.out.print(integer + ", ");
-        }
         System.out.println();
-        System.out.println("Losowa wartość: " + endFile.get(randomIndex));
+        System.out.println("Random value: " + endFields.get(randomIndex));
 
-        return endFile.get(randomIndex);
+        return endFields.get(randomIndex);
     }
 
     public int[][] dfsMazeCreator() {
@@ -75,131 +68,106 @@ public class MazeGenerator {
         }
         System.out.println();
 
-        //Oznaczamy pola:
-        //@Poczatek i @Koniec
+        // Marking fields as start/end
+        this.fieldTable[startY][0] = 3;
+        this.fieldTable[chooseEndField()][this.fieldTable.length-1] = 3;
 
-        this.tableOfFields[startY][0] = 3;
-        this.tableOfFields[chooseEndField()][this.tableOfFields.length-1] = 3;
-
-        return this.tableOfFields;
+        return this.fieldTable;
     }
 
     private void dfs_recur(List<Integer> startField, List<List<Integer>> result) {
-        this.tableOfFields[startField.get(0)][startField.get(1)] = 1;
+        this.fieldTable[startField.get(0)][startField.get(1)] = 1;
         visitedFields.add(startField);
         result.add(startField);
 
         printTable();
 
-        List<List<Integer>> neigbours = printUnvisitedNeighbours(startField.get(0), startField.get(1));
+        List<List<Integer>> neighbours = getUnvisitedNeighbours(startField.get(0), startField.get(1));
 
-        Iterator<List<Integer>> iterator = neigbours.iterator();
-        //Sprawdzamy czy do tych pol bedziemy mogli w ogole wejsc
+        Iterator<List<Integer>> iterator = neighbours.iterator();
+        //Removing non-enterable fields
         while (iterator.hasNext()) {
             List<Integer> element = iterator.next();
             int x = element.get(0);
             int y = element.get(1);
-            int numberOfNeighbours = printUnvisitedNeighbours(x, y).size();
+            int numberOfNeighbours = getUnvisitedNeighbours(x, y).size();
 
             if (numberOfNeighbours > 2 && !(isFieldBrink(x, y))) {
+                // Field has more than 2 neighbors and is not a brink field
                 //OK
             }
             else if (numberOfNeighbours > 1 && isFieldBrink(x, y)) {
+                // Field has more than 1 neighbor and is a brink field
                 // OK
             }
-            else if (numberOfNeighbours > 0 && IsCornerField(x, y)) {
+            else if (numberOfNeighbours > 0 && isCornerField(x, y)) {
+                // Field has at least 1 neighbor and is a corner field
                 // OK
             }
             else {
-                //jezeli pole zostanie uznanane, za niemozliwe do wejscia, to nalezy oznaczyc je jako sciane
-                this.tableOfFields[element.get(0)][element.get(1)] = 2;
-                //Jesli pole nie ma wystarczajacej liczby nieodwiedzonych sasiadow, to go usuwamy
-                //Zaburzaloby to wyglad labiryntu
+                // If the field is considered non-enterable, mark it as a wall and delete from this DFS Algorithm
+                this.fieldTable[element.get(0)][element.get(1)] = 2;
                 iterator.remove();
             }
         }
 
-        if (!neigbours.isEmpty()) {
-            Collections.shuffle(neigbours);
+        if (!neighbours.isEmpty()) {
+            Collections.shuffle(neighbours);
         }
-        for (List<Integer> neigbour : neigbours) {
-            if(!(visitedFields.contains(neigbour)) && this.tableOfFields[neigbour.get(0)][neigbour.get(1)] != 2) {
-                dfs_recur(neigbour, result);
+        for (List<Integer> neighbour : neighbours) {
+            if(!(visitedFields.contains(neighbour)) && this.fieldTable[neighbour.get(0)][neighbour.get(1)] != 2) {
+                dfs_recur(neighbour, result);
             }
         }
     }
 
     /**
-     * Jeesli tableOfField[x][y] == 0 --> to oznacza, ze
-     * pole nie zostalo jeszcze odwiedzone
-     * @param x - wspolrzedna x pola poczatkowego
-     * @param y - wspolrzedna y pola poczatkowego
-     * @return - Lista nieodwiedzonych sasiadow
+     * If tableOfField[x][y] == 0, it means that field has not been visited yey
+     * @param x - 'x' coordinate of starting field
+     * @param y - 'y' coordinate of starting field
+     * @return - List of unvisited neighbors
      */
-    public List<List<Integer>> printUnvisitedNeighbours(int x, int y){
+    public List<List<Integer>> getUnvisitedNeighbours(int x, int y){
 
         List<List<Integer>> neighbours = new ArrayList<>();
 
-        if (x - 1 >= 0 && this.tableOfFields[x-1][y] != 1) {
+        if (x - 1 >= 0 && this.fieldTable[x-1][y] != 1) {
             neighbours.add(List.of(x -1, y));
         }
-        if (y -1 >= 0 && this.tableOfFields[x][y-1] != 1)  {
+        if (y -1 >= 0 && this.fieldTable[x][y-1] != 1)  {
             neighbours.add(List.of(x, y-1));
         }
-        if (x + 1 <= this.mazeSize - 1 && this.tableOfFields[x+1][y] != 1) {
+        if (x + 1 <= this.mazeSize - 1 && this.fieldTable[x+1][y] != 1) {
             neighbours.add(List.of(x + 1, y));
         }
-        if (y + 1 <= this.mazeSize -1 && this.tableOfFields[x][y+1] != 1) {
+        if (y + 1 <= this.mazeSize -1 && this.fieldTable[x][y+1] != 1) {
             neighbours.add(List.of(x, y+1));
         }
- //       for (List<Integer> neighbour : neighbours) {
-   //         System.out.print(neighbour + ", ");
-//        }
         return neighbours;
 
     }
 
+    /**
+     * Check whether this field located on the brink of the maze
+     * @param x - 'x' coordinate of field
+     * @param y - 'y' coordinate of field
+     */
     public boolean isFieldBrink (int x, int y) {
-        if (x == 0 || y == 0 || x == this.mazeSize-1 || y == this.mazeSize-1) {
-            return true;
-        }
-        else { return false;}
+        return x == 0 || y == 0 || x == this.mazeSize - 1 || y == this.mazeSize - 1;
     }
 
-    private boolean IsCornerField(int x, int y) {
-        if (x == 0 && y == 0 ||
-            x == 0 && y == (mazeSize -1) ||
-            x == (mazeSize -1) && y == 0 ||
-            x == (mazeSize - 1) && y == (mazeSize - 1)) {
-            return true;
-        }
-        return false;
+    private boolean isCornerField(int x, int y) {
+        return x == 0 && y == 0 ||
+                x == 0 && y == (mazeSize - 1) ||
+                x == (mazeSize - 1) && y == 0 ||
+                x == (mazeSize - 1) && y == (mazeSize - 1);
     }
 
- /*   public boolean IsMovementPossible(int actualX, int actualY, int potentialX, int potentialY) {
-        //Ruch w gore
-        if (potentialX < actualX && potentialY == actualY) {
-            int x = potentialX;
-            int y = potentialY;
-            if(     this.tableOfFields[x-1][y-1] == 0 &&
-                    this.tableOfFields[x-1][y] == 0 &&
-                    this.tableOfFields[x-1][y+1] == 0 &&
-                    this.tableOfFields[x][y-1] == 0 &&
-                    this.tableOfFields[x][y+1] == 0) {
-                return true;
-            }
-        }
-        if (potentialX > actualX && potentialY == actualY) {
-
-        }
-    }
-
-  */
     public void printTable() {
-        for (int i = 0; i < this.tableOfFields.length; i++) {
+        for (int i = 0; i < this.fieldTable.length; i++) {
             System.out.print("{");
-            for (int j = 0; j < tableOfFields.length; j++) {
-                System.out.print(this.tableOfFields[j][i] + ", ");
+            for (int[] ints : fieldTable) {
+                System.out.print(ints[i] + ", ");
             }
             System.out.print("}");
             System.out.println();
