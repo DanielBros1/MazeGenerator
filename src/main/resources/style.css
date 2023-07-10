@@ -1,4 +1,5 @@
 .button-box {
+    -fx-background-color: #4CAF50;
     -fx-spacing: 7;
 }
 
