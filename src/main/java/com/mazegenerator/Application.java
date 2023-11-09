@@ -16,10 +16,8 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
-
 import java.util.List;
 import java.util.Objects;
-
 
 public class Application extends javafx.application.Application {
 
@@ -30,7 +28,6 @@ public class Application extends javafx.application.Application {
     private int SELECTED_SIZE_BY_USER = 15; //default size
 
     private int[][] table;
-
     private GraphicsContext gc;
     private Canvas canvas;
 
@@ -38,14 +35,12 @@ public class Application extends javafx.application.Application {
     Label heightLabel = new Label("Height: ");
     Label pixelSizeLabel = new Label("Pixel Size: ");
 
-
     public static void main(String[] args) {
         launch(args);
     }
 
     @Override
     public void start(Stage primaryStage) {
-
         //Creating a default maze
         createDefaultMaze(15);
 
@@ -65,9 +60,8 @@ public class Application extends javafx.application.Application {
         BorderPane menuPane = createMenuPane();
 
         this.canvas = new Canvas
-
                 (WIDTH * PIXEL_SIZE + (WIDTH * FRAME_SIZE),
-                        HEIGHT * PIXEL_SIZE + (HEIGHT * FRAME_SIZE));
+                HEIGHT * PIXEL_SIZE + (HEIGHT * FRAME_SIZE));
         this.gc = canvas.getGraphicsContext2D();
 
         System.out.println("Canvas width = " + this.canvas.getWidth());
@@ -83,13 +77,13 @@ public class Application extends javafx.application.Application {
         primaryStage.setScene(scene);
         primaryStage.show();
     }
+
     private void createCanvas() {
         /*
          The size of the entire image:
          Width = (number of horizontal cells * cell size) + (number of horizontal cells * frame size)
          Height = (number of vertical cells * cell size) + (number of vertical cells * frame size)
          */
-
         this.FRAME_SIZE = countFrameSize();
         this.PIXEL_SIZE = countPixelSize();
 
@@ -103,7 +97,7 @@ public class Application extends javafx.application.Application {
 
     private double countFrameSize() {
         double size = 540;
-        return size/ (this.WIDTH * 36);
+        return size / (this.WIDTH * 36);
     }
 
     private double countPixelSize(){
@@ -184,7 +178,6 @@ public class Application extends javafx.application.Application {
     }
 
     private VBox createUIBox() {
-
         VBox userInterfaceBox = new VBox();
         userInterfaceBox.setSpacing(10);
         userInterfaceBox.setPadding(new Insets(10));
@@ -196,11 +189,8 @@ public class Application extends javafx.application.Application {
 
         ChoiceBox<Integer> mazeSizeChoiceBox = new ChoiceBox<>(numbers);
         mazeSizeChoiceBox.getSelectionModel().select(Integer.valueOf("15")); //default size = 15
-
         mazeSizeChoiceBox.getStyleClass().add("choice-box-style");
-
         mazeSizeChoiceBox.setOnAction(actionEvent -> this.SELECTED_SIZE_BY_USER = mazeSizeChoiceBox.getValue());
-
         userInterfaceBox.getChildren().add(mazeSizeChoiceBox);
 
         return userInterfaceBox;
@@ -214,6 +204,7 @@ public class Application extends javafx.application.Application {
         heightLabel.setText("Height: " + HEIGHT);
         pixelSizeLabel.setText("Pixel Size: " + formattedPixelSize);
     }
+
     private HBox createButtonBox() {
         Button resetButton = new Button("Reset maze");
         Button createMazeButton = new Button("Create a new maze");
@@ -230,6 +221,7 @@ public class Application extends javafx.application.Application {
             // Clear the canvas
             gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
         });
+
         createMazeButton.setOnAction(actionEvent -> {
             createDefaultMaze(this.SELECTED_SIZE_BY_USER);
             createCanvas();
@@ -243,13 +235,11 @@ public class Application extends javafx.application.Application {
      * Function draws fields on the board
      * @param gc - Graphical context to drawing
      */
-
     private void drawPixels(GraphicsContext gc) {
         for (int y = 0; y < HEIGHT; y++) {
             for (int x = 0; x < WIDTH; x++) {
                 int pixelValue = table[y][x];
                 Color pixelColor = getColorForValue(pixelValue);
-
                 gc.setFill(pixelColor);
                 gc.fillRect(
                         x * (PIXEL_SIZE + FRAME_SIZE),
@@ -304,5 +294,4 @@ public class Application extends javafx.application.Application {
             default -> Color.LAWNGREEN;
         };
     }
-
 }

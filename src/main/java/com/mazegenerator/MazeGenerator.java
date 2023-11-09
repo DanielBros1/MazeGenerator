@@ -3,8 +3,6 @@ package com.mazegenerator;
 import java.util.*;
 
 public class MazeGenerator {
-    int mazeSize;
-
     /**
      * fieldTable
      * 0 - initialized on start
@@ -13,7 +11,7 @@ public class MazeGenerator {
      * 3 - start/end
      */
     int[][] fieldTable;
-
+    int mazeSize;
     HashSet<List<Integer>> visitedFields = new HashSet<>();
 
     public MazeGenerator(int mazeSize) {
@@ -31,6 +29,7 @@ public class MazeGenerator {
         Random random = new Random();
         return random.nextInt(this.mazeSize);
     }
+
     private int chooseEndField() {
         List<Integer> endFields = new ArrayList<>();
 
@@ -91,21 +90,22 @@ public class MazeGenerator {
             int x = element.get(0);
             int y = element.get(1);
             int numberOfNeighbours = getUnvisitedNeighbours(x, y).size();
+            boolean nonEnterableField = true;
 
-            if (numberOfNeighbours > 2 && !(isFieldBrink(x, y))) {
-                // Field has more than 2 neighbors and is not a brink field
-                //OK
-            }
-            else if (numberOfNeighbours > 1 && isFieldBrink(x, y)) {
-                // Field has more than 1 neighbor and is a brink field
-                // OK
-            }
-            else if (numberOfNeighbours > 0 && isCornerField(x, y)) {
-                // Field has at least 1 neighbor and is a corner field
-                // OK
-            }
-            else {
-                // If the field is considered non-enterable, mark it as a wall and delete from this DFS Algorithm
+            // Field has more than 2 neighbors and is not a brink field
+            if (numberOfNeighbours > 2 && !(isFieldBrink(x, y)))
+                nonEnterableField = false;
+
+            // Field has more than 1 neighbor and is a brink field
+            else if (numberOfNeighbours > 1 && isFieldBrink(x, y))
+                nonEnterableField = false;
+
+            // Field has at least 1 neighbor and is a corner field
+            else if (numberOfNeighbours > 0 && isCornerField(x, y))
+                nonEnterableField = false;
+
+            // If the field is considered non-enterable, mark it as a wall and delete from this DFS Algorithm
+            if(nonEnterableField) {
                 this.fieldTable[element.get(0)][element.get(1)] = 2;
                 iterator.remove();
             }
@@ -144,7 +144,6 @@ public class MazeGenerator {
             neighbours.add(List.of(x, y+1));
         }
         return neighbours;
-
     }
 
     /**
@@ -174,5 +173,4 @@ public class MazeGenerator {
         }
         System.out.println("----------");
     }
-
 }
